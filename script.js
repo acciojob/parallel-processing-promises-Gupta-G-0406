@@ -1,14 +1,19 @@
 const output = document.getElementById("output");
 
+const btn = document.createElement("button");
+btn.id = "download-images-button";
+btn.innerText = "Download Images";
+document.body.insertBefore(btn, output);
+
 const loadingDiv = document.createElement("div");
 loadingDiv.id = "loading";
+loadingDiv.style.display = "none";
 loadingDiv.innerText = "Loading...";
-output.appendChild(loadingDiv);
+document.body.insertBefore(loadingDiv, output);
 
 const errorDiv = document.createElement("div");
 errorDiv.id = "error";
-errorDiv.style.color = "red";
-output.appendChild(errorDiv);
+document.body.insertBefore(errorDiv, output);
 
 const images = [
   { url: "https://picsum.photos/id/237/200/300" },
@@ -20,30 +25,25 @@ function downloadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.src = url;
-
     img.onload = () => resolve(img);
-    img.onerror = () => reject(`Failed to download image: ${url}`);
+    img.onerror = () => reject(`Failed to load ${url}`);
   });
 }
 
-function downloadImages() {
+btn.addEventListener("click", () => {
   loadingDiv.style.display = "block";
   errorDiv.innerText = "";
+  output.innerHTML = "";
 
   const promises = images.map(img => downloadImage(img.url));
 
   Promise.all(promises)
     .then((imgs) => {
       loadingDiv.style.display = "none";
-
-      imgs.forEach(img => {
-        output.appendChild(img);
-      });
+      imgs.forEach(img => output.appendChild(img));
     })
-    .catch((error) => {
+    .catch((err) => {
       loadingDiv.style.display = "none";
-      errorDiv.innerText = error;
+      errorDiv.innerText = err;
     });
-}
-
-downloadImages();
+});
